@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -59,6 +60,17 @@ func (r *Repository) GetPersons(ctx context.Context) ([]PersonRecord, error) {
 		}
 
 		personRecords = append(personRecords, personRecord)
+	}
+
+	return personRecords, nil
+}
+
+func (r *Repository) GetPersonsUsingScany(ctx context.Context) ([]PersonRecord, error) {
+	query := "SELECT id, name, personal_info FROM person;"
+
+	var personRecords []PersonRecord
+	if err := pgxscan.Select(ctx, r.db, &personRecords, query); err != nil {
+		return nil, err
 	}
 
 	return personRecords, nil
