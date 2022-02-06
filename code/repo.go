@@ -75,3 +75,17 @@ func (r *Repository) GetPersonsUsingScany(ctx context.Context) ([]PersonRecord, 
 
 	return personRecords, nil
 }
+
+func (r *Repository) GetPersonsUsingScanyBySelfieURLContains(ctx context.Context, match string) ([]PersonRecord, error) {
+	query := `SELECT id, name, personal_info FROM person, jsonb_array_elements_text(personal_info -> 'SelfieURLs') AS i
+	WHERE i.value LIKE '%`
+
+	query = query + match + "%';"
+
+	var personRecords []PersonRecord
+	if err := pgxscan.Select(ctx, r.db, &personRecords, query); err != nil {
+		return nil, err
+	}
+
+	return personRecords, nil
+}
